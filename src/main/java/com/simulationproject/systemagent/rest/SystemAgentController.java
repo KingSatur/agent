@@ -1,7 +1,5 @@
 package com.simulationproject.systemagent.rest;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,25 +16,32 @@ import com.simulationproject.systemagent.services.SystemOperatorAgentService;
 public class SystemAgentController {
 
 	private final SystemOperatorAgentService service;
-	
+
 	@Autowired
-	public SystemAgentController(SystemOperatorAgentService service) {
+	public SystemAgentController(
+			SystemOperatorAgentService service) {
 		// TODO Auto-generated constructor stub
 		this.service = service;
 	}
-	
+
 	@PostMapping
-	public ResponseEntity<String> changeSystemOperatorDate(@RequestBody RequestChangeOperatorSystemDateDTO requestDto) {
+	public ResponseEntity<String> changeSystemOperatorDate(
+			@RequestBody RequestChangeOperatorSystemDateDTO requestDto) {
 		try {
-			this.service.executeCommand(requestDto.getDate());
-		} catch (IOException e) {
+			this.service.executeCommand(
+					requestDto.getDate(),
+					requestDto.getTime());
+			return ResponseEntity.status(HttpStatus.OK)
+					.body("Date has been changed");
+
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return ResponseEntity.status(
+					HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error");
+
 		}
-		return ResponseEntity.status(HttpStatus.OK).body("Hola");
 	}
-	
+
 }
