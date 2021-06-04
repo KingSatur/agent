@@ -1,5 +1,10 @@
 package com.simulationproject.systemagent.rest;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,21 +30,38 @@ public class SystemAgentController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> changeSystemOperatorDate(
+	public ResponseEntity<?> changeSystemOperatorDate(
 			@RequestBody RequestChangeOperatorSystemDateDTO requestDto) {
 		try {
 			this.service.executeCommand(
 					requestDto.getDate(),
 					requestDto.getTime());
+			HashMap<String, Object> responseBody = new HashMap<>();
+
+			Long timeStamp = System.currentTimeMillis();
+			LocalDateTime l = new Timestamp(timeStamp)
+					.toLocalDateTime();
+
+			responseBody.put("date",
+					l.format(DateTimeFormatter
+							.ofPattern("MM-dd-yyyy")));
+			responseBody.put("time", String.format("%s:%s",
+					l.getHour(), l.getMinute()));
+			responseBody.put("timestamp", timeStamp);
 			return ResponseEntity.status(HttpStatus.OK)
-					.body("Date has been changed");
+					.body(responseBody);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String msg = e.getMessage();
+			String stackTrace = e.getStackTrace()
+					.toString();
+			HashMap<String, Object> responseBody = new HashMap<>();
+			responseBody.put("errorMessage", msg);
+			responseBody.put("stackTrace", stackTrace);
 			return ResponseEntity.status(
 					HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Error");
+					.body(responseBody);
 
 		}
 	}
